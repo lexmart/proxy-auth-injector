@@ -15,7 +15,7 @@
 
 #define arrlen(x) (sizeof(x)/(sizeof((x)[0])))
 
-#define BUFSIZE 16536
+#define BUFSIZE 16384
 
 typedef struct buffer {
 	uint8_t *data;

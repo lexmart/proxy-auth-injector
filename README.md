@@ -1,6 +1,6 @@
 # proxy-auth-injector
 
-The program is a bandaid for applications that don't support proxies with username/password authentication (I'm looking at you Chrome). This program will look like a normal proxy to the application you're working with. But behind the scenes, it's relaying each request to the acutal proxy you want while adding the necessary username/proxy authentication.
+The program is a bandaid for applications that don't support proxies with username/password authentication (I'm looking at you Chrome). This program will look like a normal proxy to the application you're working with. But behind the scenes, it's relaying each request to the actual proxy you want while adding the necessary username/proxy authentication.
 
 # Usage
 

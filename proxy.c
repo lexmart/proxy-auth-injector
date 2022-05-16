@@ -11,6 +11,7 @@
 #include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
+#include <time.h>
 //#include "stb_ds.h"
 
 #define arrlen(x) (sizeof(x)/(sizeof((x)[0])))
@@ -358,16 +359,22 @@ int main(int argc, char **argv) {
 	void *free_buffers = 0;
 	int num_mallocs = 0;
 
+	time_t last_print = 0;
+
 	for(;;) {
 		int fdcount = epoll_wait(ep, events, arrlen(events), -1);
 
 		for(int i = 0; i < fdcount; i++) {
 			struct epoll_event *event = events + i;
 			if(event->data.fd == server_fd) {
-				if(conncount < arrlen(conns)) {
-					add_connection(server_fd, conns, &conncount, ep, proxy_ip, proxy_port, &free_buffers, &num_mallocs);
+				if(event->events & EPOLLIN) {
+					if(conncount < arrlen(conns)) {
+						add_connection(server_fd, conns, &conncount, ep, proxy_ip, proxy_port, &free_buffers, &num_mallocs);
+					} else {
+						print_error("ran out of connections");
+					}
 				} else {
-					print_error("ran out of connections");
+					print_error("server_fd didn't get EPOLLIN");
 				}
 			} else {
 				int sockfd = event->data.fd;
@@ -391,6 +398,18 @@ int main(int argc, char **argv) {
 						conn->proxy_write_ready = 1;
 					}
 				}
+				/*if(!(event->events & (EPOLLIN|EPOLLOUT))) {
+					if(sockfd == conn->client_fd) {
+						conn->client_read_ready = 0;
+						conn->client_write_ready = 0;
+						conn->client_closed = 1;
+					} else {
+						assert(sockfd == conn->proxy_fd);
+						conn->proxy_read_ready = 0;
+						conn->proxy_write_ready = 0;
+						conn->proxy_closed = 1;
+					}
+				}*/
 			}
 		}
 
@@ -480,8 +499,11 @@ int main(int argc, char **argv) {
 				i++;
 			}
 		}
-		
-		printf("\33[2K\ractive connections = %d \t num mallocs = %d", conncount, num_mallocs);
-		fflush(stdout);
+
+		time_t now = time(0);
+		if(now - last_print >= 300) {		
+			printf("connections = %4d\tmallocs = %d\n", conncount, num_mallocs);
+			last_print = now;
+		}
 	}
 }

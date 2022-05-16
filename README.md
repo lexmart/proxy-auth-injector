@@ -9,7 +9,7 @@ make
 ./proxy <localport> <remoteproxy_ip> <remoteproxy_port> <username:password>
 ```
 
-Then direct your application to use ```127.0.0.1:4321`` as the proxy if ```4321``` was the local port you specified. For example, for Chrome you would add the flag ```--proxy-server=http://127.0.0.1:4321```
+Then direct your application to use ```127.0.0.1:4321``` as the proxy if ```4321``` was the local port you specified. For example, for Chrome you would add the flag ```--proxy-server=http://127.0.0.1:4321```
 
 # TODO
 

@@ -230,10 +230,11 @@ void inject_proxy_auth(buffer *buf, char *auth) {
 		buf->data[buf->len] = 0;
 		if(buf->len < BUFSIZE) buf->data[buf->len] = 0; // for debug printing
 	} else if(!strncmp((char *)buf->data, "POST ", 5)) {
-		int body = find_pattern_in_buf(buf, "\r\n\r\n", 4) + 4;
+		int body = find_pattern_in_buf(buf, "\r\n\r\n", 4);
 		if(body < 0) {
 			return;
 		}
+		body += 4;
 		
 		memcpy(buf->data + body - 2 + authbytes, buf->data + body, buf->len - body);
 		memcpy(buf->data + body - 2, auth, authbytes);

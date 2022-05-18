@@ -71,7 +71,7 @@ void print_error(char *error) {
 	exit(1);
 }
 
-int get_server_socket(char *port) {
+int get_server_socket(char *listen_ip, char *port) {
 	int sock;
 	struct addrinfo hints;
 	struct addrinfo *ai;
@@ -79,7 +79,7 @@ int get_server_socket(char *port) {
 	hints.ai_family = AF_UNSPEC;
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
-	if(getaddrinfo(0, port, &hints, &ai) != 0) {
+	if(getaddrinfo(listen_ip, port, &hints, &ai) != 0) {
 		print_error("getaddrinfo");
 	}
 	sock = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
@@ -329,13 +329,14 @@ void add_connection(int server_fd, connection *conns, int *conncount, int ep, ch
 
 int main(int argc, char **argv) {
 	if(argc == 1) {
-		printf("Usage: ./proxy <listen_port> <proxy_ip> <proxy_port> <proxy_username>:<proxy_password>\n");
+		printf("Usage: ./proxy <listen_ip> <listen_port> <proxy_ip> <proxy_port> <proxy_username>:<proxy_password>\n");
 		exit(0);
 	}
-	char *listen_port = argv[1];
-	char *proxy_ip = argv[2];
-	char *proxy_port = argv[3];
-	char *proxy_auth = argv[4];
+	char *listen_ip = argv[1];
+	char *listen_port = argv[2];
+	char *proxy_ip = argv[3];
+	char *proxy_port = argv[4];
+	char *proxy_auth = argv[5];
 
 	char *proxy_auth_key = "Proxy-Authorization: Basic ";
 	char proxy_auth_value[512];
@@ -344,7 +345,7 @@ int main(int argc, char **argv) {
 	assert(strlen(proxy_auth_key) + strlen(proxy_auth_value) + 4 < sizeof(proxy_auth_buf));
 	sprintf(proxy_auth_buf, "%s%s\r\n\r\n", proxy_auth_key, proxy_auth_value);
 
-	int server_fd = get_server_socket(listen_port);	
+	int server_fd = get_server_socket(listen_ip, listen_port);	
 
 	int ep = epoll_create(20);
 	if(ep < 0) {
